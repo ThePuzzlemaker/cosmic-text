@@ -3,8 +3,8 @@
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::fmt;
-use swash::scale::{image::Content, ScaleContext};
 use swash::scale::{Render, Source, StrikeWith};
+use swash::scale::{ScaleContext, image::Content};
 use swash::zeno::{Format, Vector};
 
 use crate::{CacheKey, CacheKeyFlags, Color, FontSystem, HashMap};
@@ -17,7 +17,7 @@ fn swash_image(
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<SwashImage> {
-    let font = match font_system.get_font(cache_key.font_id) {
+    let font = match font_system.get_font(cache_key.font_id, cache_key.font_weight) {
         Some(some) => some,
         None => {
             log::warn!("did not find font {:?}", cache_key.font_id);
@@ -25,12 +25,23 @@ fn swash_image(
         }
     };
 
+    let variable_width = font
+        .as_swash()
+        .variations()
+        .find_by_tag(swash::Tag::from_be_bytes(*b"wght"));
+
     // Build the scaler
     let mut scaler = context
         .builder(font.as_swash())
-        .size(f32::from_bits(cache_key.font_size_bits))
-        .hint(true)
-        .build();
+        .size(f32::from_bits(cache_key.font_size_bits));
+    if let Some(variation) = variable_width {
+        scaler = scaler.variations(std::iter::once(swash::Setting {
+            tag: swash::Tag::from_be_bytes(*b"wght"),
+            value: (cache_key.font_weight.0 as f32)
+                .clamp(variation.min_value(), variation.max_value()),
+        }))
+    }
+    let mut scaler = scaler.hint(true).build();
 
     // Compute the fractional offset-- you'll likely want to quantize this
     // in a real renderer
@@ -68,7 +79,7 @@ fn swash_outline_commands(
 ) -> Option<Box<[swash::zeno::Command]>> {
     use swash::zeno::PathData as _;
 
-    let font = match font_system.get_font(cache_key.font_id) {
+    let font = match font_system.get_font(cache_key.font_id, cache_key.font_weight) {
         Some(some) => some,
         None => {
             log::warn!("did not find font {:?}", cache_key.font_id);

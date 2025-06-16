@@ -23,6 +23,8 @@ pub struct CacheKey {
     pub x_bin: SubpixelBin,
     /// Binning of fractional Y offset
     pub y_bin: SubpixelBin,
+    /// Font weight
+    pub font_weight: fontdb::Weight,
     /// [`CacheKeyFlags`]
     pub flags: CacheKeyFlags,
 }
@@ -33,6 +35,7 @@ impl CacheKey {
         glyph_id: u16,
         font_size: f32,
         pos: (f32, f32),
+        weight: fontdb::Weight,
         flags: CacheKeyFlags,
     ) -> (Self, i32, i32) {
         let (x, x_bin) = SubpixelBin::new(pos.0);
@@ -45,6 +48,7 @@ impl CacheKey {
                 x_bin,
                 y_bin,
                 flags,
+                font_weight: weight,
             },
             x,
             y,

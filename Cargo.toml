@@ -64,12 +64,12 @@ vi = ["modit", "syntect", "cosmic_undo_2"]
 wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
 
-[[bench]]
-name = "layout"
-harness = false
+#[[bench]]
+#name = "layout"
+#harness = false
 
-[workspace]
-members = ["examples/*"]
+#[workspace]
+#members = ["examples/*"]
 
 [dev-dependencies]
 tiny-skia = "0.11.2"
@@ -77,8 +77,8 @@ criterion = { version = "0.5.1", default-features = false, features = [
     "cargo_bench_support",
 ] }
 
-[profile.test]
-opt-level = 1
+#[profile.test]
+#opt-level = 1
 
-[package.metadata.docs.rs]
-features = ["vi"]
+#[package.metadata.docs.rs]
+#features = ["vi"]

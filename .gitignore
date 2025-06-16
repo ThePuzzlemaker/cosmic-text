@@ -2,3 +2,4 @@ Cargo.lock
 sample/udhr*
 target
 **/.DS_Store
+.dir-locals.el

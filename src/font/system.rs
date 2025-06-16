@@ -320,6 +320,20 @@ impl FontSystem {
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 let now = std::time::Instant::now();
 
+                let first_choice = self.db.query(&fontdb::Query {
+                    families: &[attrs.family],
+                    weight: attrs.weight,
+                    stretch: attrs.stretch,
+                    style: attrs.style,
+                });
+                if let Some(first_choice) = first_choice {
+                    let face = self.db.face(first_choice).unwrap();
+                    return Arc::new(vec![FontMatchKey {
+                        font_weight_diff: attrs.weight.0.abs_diff(face.weight.0),
+                        font_weight: face.weight.0,
+                        id: face.id,
+                    }]);
+                }
                 let mut font_match_keys = self
                     .db
                     .faces()
